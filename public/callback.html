@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Callback</title>
+  <script>
+  // console.log('callback');
+  (function() {
+    // add security for injected url regex
+  var urlSplit = window.location.href.split('?');
+  var data = {};
+
+  for (var i=0; i<urlSplit.length; i++) {
+    if (urlSplit[i].indexOf('=')>0) {
+      var split = urlSplit[i].split('=');
+      data[split[0]] = split[1];
+    }
+  }
+
+  // console.log('initial hash', hash);
+  if (data.code) {
+    window.opener.postMessage(JSON.stringify({
+      type:'code',
+      code: data.code
+      // state : state
+    }), '*');
+    // window.close();
+    }
+})();
+
+
+  </script>
+</head>
+
+<body>
+</body>
+
+</html>
