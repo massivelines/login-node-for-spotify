@@ -22,12 +22,17 @@ app.all('*', function(req, res, next) {
   next();
 });
 
-app.use(function (req, res) {
-  res.setHeader('Content-Type', 'text/plain');
-  res.write('you posted:\n');
-  res.end(JSON.stringify(req.body, null, 2));
-  console.log(req.body);
+app.post('/', function(request, response){
+  console.log(request.body);      // your JSON
+   response.send(request.body);    // echo the result back
 });
+
+// app.use(function (req, res) {
+//   res.setHeader('Content-Type', 'application/json');
+//   res.write('you posted:\n');
+//   res.end(JSON.stringify(req.body, null, 2));
+//   console.log(req.body);
+// });
 
 
 // app.get('/login', function(req, res) {
@@ -51,10 +56,10 @@ app.use(function (req, res) {
   // res.end();
 // });
 
-// app.post('/test', function(req, res) {
-//   console.log(req.body); // populated!
-//   res.status(200).send(req.body);
-// });
+app.post('/test', function(req, res) {
+  console.log(req.body); // populated!
+  res.send(req.body);
+});
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
