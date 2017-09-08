@@ -19,13 +19,35 @@
 
   // console.log('initial hash', hash);
   if (data.code) {
-    window.opener.postMessage(JSON.stringify({
-      type:'code',
-      code: data.code
-      // state : state
-    }), '*');
+
+    fetch('http://localhost:5000/callback', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(function(response) {
+      if(response.status == 200) {
+        window.close();
+      }
+      // console.log(response);
+    }).catch(function(err) {
+      // Error :(
+      console.log(err);
+      console.log('error');
+    });
+
+
+    // sends data to window that opended popup
+    // window.opener.postMessage(JSON.stringify({
+    //   type:'code',
+    //   code: data.code
+    //   // state : state
+    // }), '*');
     // window.close();
-    }
+  } else {
+    // TODO: error
+  }
 })();
 
 
