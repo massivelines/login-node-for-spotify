@@ -1,41 +1,29 @@
-var SpotifyHeroku = function(scopes) {
+var SpotifyHeroku = function(scopes, nodeHost) {
   this.scopes = scopes;
-  // this.appHost = appHost;
 
-  var client_id = '8d2ca6ffda244def9852f84650c2bfa2'; // Your client id
-  var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
+  var windowURL = window.location.origin;
 
 
+  this.login = function() {
 
-  this.login = function(scopes) {
+    fetch('http://localhost:5000/data', {
+      method: 'POST',
+      body: JSON.stringify({
+        scopes: scopes,
+        hostURL: windowURL
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(function(response) {
+      console.log(response);
+    }).catch(function(err) {
+      // Error :(
+      console.log(err);
+      console.log('error');
+    });
 
-    // console.log(test);
-
-    // fetch('http://localhost:5000/test', {
-    //   method: 'POST',
-    //   body: JSON.stringify(scopes),
-    //   // mode: 'cors',
-    //   headers: {
-    //     // 'Accept': 'application/json',
-    //     'Content-Type': 'application/json'
-    //   }
-    // }).then(function(response) {
-    //   return response.json();
-    // }).then(function(data) {
-    //   console.log(data);
-    // }).catch(function(err) {
-    //   // Error :(
-    //   console.log(err);
-    //   console.log('error');
-    // });
-
-    // TEMP: for local testing
     var url = 'http://localhost:5000/login';
-
-    // var url = 'https://accounts.spotify.com/authorize?client_id=' + client_id +
-    //   '&redirect_uri=' + encodeURIComponent(redirect_uri) +
-    //   '&scope=' + encodeURIComponent(scopes.join(' ')) +
-    //   '&response_type=code&show_dialog=true';
 
     var width = 450,
       height = 730,
@@ -52,14 +40,6 @@ var SpotifyHeroku = function(scopes) {
       ', left=' + left
     );
 
-
-    var test = {
-      tester: 'maybe',
-      yep: 'nope'
-    };
-
-    // TODO: return token and data
-    return test;
   };
 
 };
@@ -69,6 +49,31 @@ window.addEventListener('message', function(event) {
   var hash = JSON.parse(event.data);
   console.log(hash);
 }, false);
+
+// this.login = function() {
+//   console.log(scopes);
+//   var test = {
+//     tester: 'maybe',
+//     yep: 'nope'
+//   };
+//
+//   fetch('http://localhost:5000/data', {
+//     method: 'POST',
+//     body: JSON.stringify(scopes),
+//     // mode: 'cors',
+//     headers: {
+//       // 'Accept': 'application/json',
+//       'Content-Type': 'application/json'
+//     }
+//   }).then(function(response) {
+//     return response.json();
+//   }).then(function(data) {
+//     console.log(data);
+//   }).catch(function(err) {
+//     // Error :(
+//     console.log(err);
+//     console.log('error');
+//   });
 
 // login
 // need to open popup from node?????
