@@ -8,15 +8,16 @@
   (function() {
     // add security for injected url regex
   var urlSplit = window.location.href.split('?');
+  urlSplit = urlSplit[1].split('&');
   var data = {};
-
+  console.log(urlSplit);
   for (var i=0; i<urlSplit.length; i++) {
     if (urlSplit[i].indexOf('=')>0) {
       var split = urlSplit[i].split('=');
       data[split[0]] = split[1];
     }
   }
-
+  console.log(data);
   // console.log('initial hash', hash);
   if (data.code) {
 
@@ -36,20 +37,12 @@
       console.log(err);
       console.log('error');
     });
-
-
-    // sends data to window that opended popup
-    // window.opener.postMessage(JSON.stringify({
-    //   type:'code',
-    //   code: data.code
-    //   // state : state
-    // }), '*');
-    // window.close();
   } else {
     // TODO: error
   }
 })();
 
+// TODO: loading screen?
 
   </script>
 </head>
