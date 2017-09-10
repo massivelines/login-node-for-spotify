@@ -4,50 +4,50 @@ var SpotifyHeroku = function() {
 
   // runs at launch
   function init() {
-    // sends scopes and main url of page to node server
-    fetch(nodeHost + '/data', {
-      method: 'POST',
-      body: JSON.stringify({
-        scopes: scopes,
-        hostURL: windowURL
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).catch(function(err) {
-      // Error :(
-      console.log(err);
-      console.log('error');
-    });
-
-    // TODO test for login localStorage
-    // if contains refresh_token try first
-    // if success hide login
-    // if error do nothing
-
-    if(localStorage.getItem('refresh_token')){
-      console.log('refresh_token at startup');
-      var ws = new WebSocket('ws://localhost:5000/refresh');
-      ws.onopen = function () {
-        ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
-      };
-
-      ws.onmessage = function(message) {
-        var newToken = JSON.parse(message.data);
-        // checks for error code, if no error refresh token and hide login
-        if(newToken.statusCode !== 400){
-          console.log(newToken);
-          storage(newToken);
-          // hide login
-          document.getElementById('login').style.display = 'none';
-          launch();
-        }
-        // else {
-        //   console.log(newToken);
-        // }
-        ws.close();
-      };
-    }
+    // // sends scopes and main url of page to node server
+    // fetch(nodeHost + '/data', {
+    //   method: 'POST',
+    //   body: JSON.stringify({
+    //     scopes: scopes,
+    //     hostURL: windowURL
+    //   }),
+    //   headers: {
+    //     'Content-Type': 'application/json'
+    //   }
+    // }).catch(function(err) {
+    //   // Error :(
+    //   console.log(err);
+    //   console.log('error');
+    // });
+    //
+    // // TODO test for login localStorage
+    // // if contains refresh_token try first
+    // // if success hide login
+    // // if error do nothing
+    //
+    // if(localStorage.getItem('refresh_token')){
+    //   console.log('refresh_token at startup');
+    //   var ws = new WebSocket('ws://localhost:5000/refresh');
+    //   ws.onopen = function () {
+    //     ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
+    //   };
+    //
+    //   ws.onmessage = function(message) {
+    //     var newToken = JSON.parse(message.data);
+    //     // checks for error code, if no error refresh token and hide login
+    //     if(newToken.statusCode !== 400){
+    //       console.log(newToken);
+    //       storage(newToken);
+    //       // hide login
+    //       document.getElementById('login').style.display = 'none';
+    //       launch();
+    //     }
+    //     // else {
+    //     //   console.log(newToken);
+    //     // }
+    //     ws.close();
+      // };
+    // }
 
   }
 
