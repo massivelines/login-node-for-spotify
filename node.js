@@ -15,7 +15,7 @@ var client_id = '8d2ca6ffda244def9852f84650c2bfa2'; // Your client id
 var client_secret = '5e1882b5faba4be4b3db73e9b72ac565';
 var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
 
-var allowedConnections = ['http://localhost:5000', 'http://localhost:7883'];
+var allowedConnections = ['http://localhost:5000', 'http://localhost:7879'];
 
 var host;
 var scopes = [];
@@ -205,3 +205,4 @@ app.listen(app.get('port'), function() {
 // for websocket
 // var ip = req.headers.origin;
 // console.log(ip);
+// TODO check if html is needed in callback address on spotify also update readme

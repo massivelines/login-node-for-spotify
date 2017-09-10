@@ -121,6 +121,7 @@ var SpotifyHeroku = function() {
   };//--------------end of refresh
 
   this.logout = function () {
+    document.getElementById('login').style.display = 'block';
     localStorage.clear();
   };//--------------end of logout
 
