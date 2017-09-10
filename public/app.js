@@ -52,78 +52,78 @@ var SpotifyHeroku = function() {
   }
 
 
-  // function storage(token) {
-  //   // TODO determin if all are needed in storage or just access token
-  //   for (var key in token){
-  //     localStorage.setItem(key, token[key]);
-  //   }
-  // }
-  //
-  //
-  // this.login = function() {
-  //
-  //   // then opens a popup window to login into, that sends info back to the node server
-  //   var url = nodeHost + '/login';
-  //
-  //   var width = 450,
-  //     height = 730,
-  //     left = screen.width / 2 - width / 2,
-  //     top = screen.height / 2 - height / 2;
-  //
-  //   var popup;
-  //
-  //   popup = window.open(
-  //     url,
-  //     'Spotify',
-  //     'menubar=no,location=no,resizable=no,scrollbars=no,status=no,' +
-  //     ' width=' + width +
-  //     ', height=' + height +
-  //     ', top=' + top +
-  //     ', left=' + left
-  //   );
+  function storage(token) {
+    // TODO determin if all are needed in storage or just access token
+    for (var key in token){
+      localStorage.setItem(key, token[key]);
+    }
+  }
 
-    // // when the popu closes, then get the tokens
-    // function popupClosed() {
-    //   if (popup.closed) {
-  //       // TODO secure websockets
-  //       // var HOST = nodeHost.replace(/^http/, 'ws');
-  //       var ws = new WebSocket('ws://localhost:5000/token');
-  //
-  //       ws.onmessage = function(message) {
-  //         var token = JSON.parse(message.data);
-  //         storage(token);
-  //         console.log('logged in');
-  //         ws.close();
-  //       };
-  //     } else {
-  //       setTimeout(popupClosed, 500);
-  //     }
-  //   }
-  //   popupClosed();
-  //
-  //
-  //
-  // }; //--------------end of login
-  //
-  // this.refresh = function () {
-  //   var ws = new WebSocket('ws://localhost:5000/refresh');
-  //   ws.onopen = function () {
-  //     ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
-  //   };
-  //
-  //   ws.onmessage = function(message) {
-  //     var newToken = JSON.parse(message.data);
-  //     console.log(newToken);
-  //     storage(newToken);
-  //     console.log('refresh');
-  //     ws.close();
-  //   };
-  // };//--------------end of refresh
-  //
-  // this.logout = function () {
-  //   document.getElementById('login').style.display = 'block';
-  //   localStorage.clear();
-  // };//--------------end of logout
+
+  this.login = function() {
+
+    // then opens a popup window to login into, that sends info back to the node server
+    var url = nodeHost + '/login';
+
+    var width = 450,
+      height = 730,
+      left = screen.width / 2 - width / 2,
+      top = screen.height / 2 - height / 2;
+
+    var popup;
+
+    popup = window.open(
+      url,
+      'Spotify',
+      'menubar=no,location=no,resizable=no,scrollbars=no,status=no,' +
+      ' width=' + width +
+      ', height=' + height +
+      ', top=' + top +
+      ', left=' + left
+    );
+
+    // when the popu closes, then get the tokens
+    function popupClosed() {
+      if (popup.closed) {
+        // TODO secure websockets
+        // var HOST = nodeHost.replace(/^http/, 'ws');
+        var ws = new WebSocket('ws://localhost:5000/token');
+
+        ws.onmessage = function(message) {
+          var token = JSON.parse(message.data);
+          storage(token);
+          console.log('logged in');
+          ws.close();
+        };
+      } else {
+        setTimeout(popupClosed, 500);
+      }
+    }
+    popupClosed();
+
+
+
+  }; //--------------end of login
+
+  this.refresh = function () {
+    var ws = new WebSocket('ws://localhost:5000/refresh');
+    ws.onopen = function () {
+      ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
+    };
+
+    ws.onmessage = function(message) {
+      var newToken = JSON.parse(message.data);
+      console.log(newToken);
+      storage(newToken);
+      console.log('refresh');
+      ws.close();
+    };
+  };//--------------end of refresh
+
+  this.logout = function () {
+    document.getElementById('login').style.display = 'block';
+    localStorage.clear();
+  };//--------------end of logout
 
   init();
 };
