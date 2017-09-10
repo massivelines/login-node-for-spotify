@@ -2,29 +2,61 @@ var SpotifyHeroku = function() {
 
   var windowURL = window.location.origin;
 
+  // runs at launch
   function init() {
+    // sends scopes and main url of page to node server
+    fetch(nodeHost + '/data', {
+      method: 'POST',
+      body: JSON.stringify({
+        scopes: scopes,
+        hostURL: windowURL
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).catch(function(err) {
+      // Error :(
+      console.log(err);
+      console.log('error');
+    });
+
+    // TODO test for login localStorage
+    // if contains refresh_token try first
+    // if success hide login
+    // if error do nothing
+
+    if(localStorage.getItem('refresh_token')){
+      console.log('refresh_token at startup');
+      var ws = new WebSocket('ws://localhost:5000/refresh');
+      ws.onopen = function () {
+        ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
+      };
+
+      ws.onmessage = function(message) {
+        var newToken = JSON.parse(message.data);
+        // checks for error code, if no error refresh token and hide login
+        if(newToken.statusCode !== 400){
+          console.log(newToken);
+          storage(newToken);
+          // hide login
+          document.getElementById('login').style.display = 'none';
+          launch();
+        }
+        // else {
+        //   console.log(newToken);
+        // }
+        ws.close();
+      };
+    }
 
   }
-  // sends scopes and main url of page to node server
-  fetch(nodeHost + '/data', {
-    method: 'POST',
-    body: JSON.stringify({
-      scopes: scopes,
-      hostURL: windowURL
-    }),
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).catch(function(err) {
-    // Error :(
-    console.log(err);
-    console.log('error');
-  });
+
 
   function storage(token) {
-    localStorage.setItem('access_token', token.access_token);
-    localStorage.setItem('expires_in', token.expires_in);
-    localStorage.setItem('refresh_token', token.refresh_token);
+    // TODO determin if all are needed in storage or just access token
+    for (var key in token){
+      localStorage.setItem(key, token[key]);
+    }
   }
 
 
@@ -60,6 +92,7 @@ var SpotifyHeroku = function() {
         ws.onmessage = function(message) {
           var token = JSON.parse(message.data);
           storage(token);
+          console.log('logged in');
           ws.close();
         };
       } else {
@@ -72,6 +105,24 @@ var SpotifyHeroku = function() {
 
   }; //--------------end of login
 
+  this.refresh = function () {
+    var ws = new WebSocket('ws://localhost:5000/refresh');
+    ws.onopen = function () {
+      ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
+    };
+
+    ws.onmessage = function(message) {
+      var newToken = JSON.parse(message.data);
+      console.log(newToken);
+      storage(newToken);
+      console.log('refresh');
+      ws.close();
+    };
+  };//--------------end of refresh
+
+  this.logout = function () {
+    localStorage.clear();
+  };//--------------end of logout
 
   init();
 };

@@ -123,7 +123,7 @@ app.post('/callback', function(req, res) {
         refresh_token: body.refresh_token,
         expires_in: body.expires_in
       };
-      console.log(token);
+      // console.log(token);
       // send status code to close popup
       res.sendStatus(200);
     }).catch(function(err) {
@@ -153,14 +153,17 @@ app.ws('/token', function (ws, req) {
 // refreshes the token called by the websocket
 app.ws('/refresh', function (ws, req) {
   ws.on('message', function (old_token) {
+
     old_token = JSON.parse(old_token);
-    // console.log(old_token.refresh_token);
+    // console.log(old_token);
+
     var data = req.body;
     var authOptions = {
       method: 'POST',
       url: 'https://accounts.spotify.com/api/token',
       form: {
-        refresh_token: old_token.refresh_token,
+        // refresh_token: 'old_token',
+        refresh_token: old_token,
         grant_type: 'refresh_token'
       },
       headers: {
@@ -180,7 +183,13 @@ app.ws('/refresh', function (ws, req) {
       ws.send(JSON.stringify(newToken));
     }).catch(function(err) {
       // TODO: when error redirect to login
+
       console.log(err);
+      var error = {
+        statusCode: err.statusCode,
+        message: err.message
+      };
+      ws.send(JSON.stringify(error));
     });
 
   });
