@@ -4,7 +4,7 @@
   "description": "",
   "main": "node.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node node.js"
   },
   "author": "",
   "license": "MIT",
