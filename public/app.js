@@ -132,7 +132,7 @@ var SpotifyHeroku = function() {
       // test if refresh was successful else console.log and show login
       var body = JSON.parse(message.data);
       if (body.access_token) {
-        storage(body.access_token);
+        storage(body);
       } else {
         window.alert("Error getting refresh token check console");
         console.log(body);
