@@ -13,14 +13,13 @@ expressWs(app);
 // TODO: convert to system vars
 var client_id = '8d2ca6ffda244def9852f84650c2bfa2'; // Your client id
 var client_secret = '5e1882b5faba4be4b3db73e9b72ac565';
-var redirect_uri = 'https://node-tester-spotify.herokuapp.com/callback.html'; // Your redirect uri
-// var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
+// var redirect_uri = 'https://login-node-for-spotify.herokuapp.com/callback.html'; // Your redirect uri
+var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
 
-var allowedConnections = ['http://localhost:5000', 'http://localhost:7879'];
 
-var host;
-var scopes = [];
-var token;
+var host; //stores what page called node server
+var scopes = []; //stores scopes
+var token; //stores current token
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -60,7 +59,8 @@ var generateRandomString = function(length) {
 };
 var state;
 
-// data pulled host calling requests and scopes
+
+// data sent when page loads, host scopes
 app.post('/data', function(req, res) {
   // console.log(req.body);
   host = req.body.hostURL;
@@ -68,13 +68,16 @@ app.post('/data', function(req, res) {
   res.end();
 });
 
-// redirect for the intial login popup
+
+// when login popup is called, redirecets it to correct url
 app.get('/login', function(req, res) {
+  // set token to null incase already had set info example logout and someone else loged in
   token = null;
   state = generateRandomString(16);
 
-  // TODO error out if never filled
-  // loop that makes sure scopes is populated before calling for the redirect
+  // TODO error out if scopes never filled
+
+  // the loop makes sure scopes is populated before calling login redirect on the popup
   function loginRedirect() {
     if (scopes.length > 0) {
       var url = 'https://accounts.spotify.com/authorize?client_id=' + client_id +
@@ -82,6 +85,7 @@ app.get('/login', function(req, res) {
         '&scope=' + encodeURIComponent(scopes.join(' ')) +
         '&response_type=code'+
         '&state=' +state+
+        // can force user to approve scopes every time.
         '&show_dialog=true';
       res.redirect(url);
     } else {
@@ -91,12 +95,10 @@ app.get('/login', function(req, res) {
     }
   }
   loginRedirect();
-
 });
 
-// callback from callback.html to pass spotify response codes to turn into token
+// callback from login popup, passes spotify response codes, to turn it into a token
 app.post('/callback', function(req, res) {
-  // console.log('callback called');
   var data = req.body;
 
   // test if state is sent back the same
@@ -131,11 +133,13 @@ app.post('/callback', function(req, res) {
       // TODO: when error redirect to login
       console.log(err);
     });
+  } else {
+    // TODO create error
   }
 
 });
 
-// sends token to websocket js file
+// when callback closes popup with status code app.js opens a websocket to recive the tokens
 app.ws('/token', function (ws, req) {
   // TODO error out if never filled
   function sendToken() {
@@ -151,7 +155,7 @@ app.ws('/token', function (ws, req) {
   sendToken();
 });
 
-// refreshes the token called by the websocket
+// called to refresh the access_token
 app.ws('/refresh', function (ws, req) {
   ws.on('message', function (old_token) {
 
@@ -173,7 +177,7 @@ app.ws('/refresh', function (ws, req) {
       json: true
     };
 
-    // convert code into token
+    // get newToken using refresh_token
     rp(authOptions).
     then(function(body) {
 

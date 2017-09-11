@@ -2,9 +2,9 @@ var SpotifyHeroku = function() {
 
   var windowURL = window.location.origin;
 
-  // runs at launch
+  // runs at page load
   function init() {
-    // sends scopes and main url of page to node server
+    // sends scopes and main url of page to the node server
     fetch(nodeHost + '/data', {
       method: 'POST',
       body: JSON.stringify({
@@ -20,14 +20,12 @@ var SpotifyHeroku = function() {
       console.log('error');
     });
 
-    // TODO test for login localStorage
-    // if contains refresh_token try first
-    // if success hide login
-    // if error do nothing
-
+    // tests to see if there is a refresh token already
+    // and if it can be used, refresh current token and hide login
+    // else do nothing
     if (localStorage.getItem('refresh_token')) {
       console.log('refresh_token at startup');
-      // TODO strip the http and https replace with ws
+      // strips the http and https replace with ws for websocket
       var host = nodeHost.replace(/^https|^http/, 'ws');
       var ws = new WebSocket(host + '/refresh');
       ws.onopen = function() {
@@ -36,17 +34,13 @@ var SpotifyHeroku = function() {
 
       ws.onmessage = function(message) {
         var newToken = JSON.parse(message.data);
-        // checks for error code, if no error refresh token and hide login
+        // if error code 400 is not recived a token has been recived
         if (newToken.statusCode !== 400) {
-          console.log(newToken);
           storage(newToken);
           // hide login
           document.getElementById('login').style.display = 'none';
           launch();
         }
-        // else {
-        //   console.log(newToken);
-        // }
         ws.close();
       };
     }
@@ -54,17 +48,17 @@ var SpotifyHeroku = function() {
   }
 
 
+  // called to store tokens into localStorage
   function storage(token) {
-    // TODO determin if all are needed in storage or just access token
     for (var key in token) {
       localStorage.setItem(key, token[key]);
     }
   }
 
 
+  // LOGIN - opens popup at nodeHost/login then node redirects and popup sends node information
   this.login = function() {
-
-    // then opens a popup window to login into, that sends info back to the node server
+    // sets vars for popup
     var url = nodeHost + '/login';
 
     var width = 450,
@@ -72,8 +66,8 @@ var SpotifyHeroku = function() {
       left = screen.width / 2 - width / 2,
       top = screen.height / 2 - height / 2;
 
+    // open popup
     var popup;
-
     popup = window.open(
       url,
       'Spotify',
@@ -84,17 +78,29 @@ var SpotifyHeroku = function() {
       ', left=' + left
     );
 
-    // when the popu closes, then get the tokens
+    /**
+     * popup gets callback url info and sends it to node /callback
+     * node returns status to popup when it recives a response from spotify
+     * if correct data close popup
+     **/
+
+    // when popup lauches, start loop to test for closed status
+    // when the popup closes call node /token
+    // changes the code recived from /callback to a token
+    // then calls storage() to save tokens in localStorage
     function popupClosed() {
       if (popup.closed) {
         // TODO secure websockets
+        // TODO test if callback closed popup
+        // opens websockets
         var host = nodeHost.replace(/^https|^http/, 'ws');
         var ws = new WebSocket(host + '/token');
 
         ws.onmessage = function(message) {
+          // TODO test for data
           var token = JSON.parse(message.data);
           storage(token);
-          console.log('logged in');
+          document.getElementById('login').style.display = 'none';
           ws.close();
         };
       } else {
@@ -103,10 +109,9 @@ var SpotifyHeroku = function() {
     }
     popupClosed();
 
-
-
   }; //--------------end of login
 
+  // REFRESH - called to refesh the access_token
   this.refresh = function() {
     var ws = new WebSocket('ws://node-tester-spotify.herokuapp.com/refresh');
     ws.onopen = function() {
@@ -122,43 +127,14 @@ var SpotifyHeroku = function() {
     };
   }; //--------------end of refresh
 
+
+  // LOGOUT - called to clear tokens and show login
   this.logout = function() {
-    document.getElementById('login').style.display = 'block';
+    document.getElementById('login').style.display = 'inherit';
     localStorage.clear();
   }; //--------------end of logout
 
+
+  // runs init function at page load
   init();
 };
-
-
-
-
-// login
-// need to open popup from node?????
-// -open webstocket
-// -pass scopes
-// -return success
-// -launch login popup
-// -sucess exchange code for token ect
-// -pass token ect to browser
-// -close webstocket
-
-// refresh token
-// -open webstocket
-// -call POST
-// -close webstocket
-
-// or
-
-// login
-// -fetch from app.js
-// -pass scopes
-// -return success
-// -launch login popup
-// -send code ect to node throuh fetch
-// -send token to browser by parsebody????
-
-// refresh
-// -call function pass vars
-// -fetch to node
-// -send token to browser by parsebody

@@ -4,46 +4,49 @@
 <head>
   <title>Callback</title>
   <script>
-  // console.log('callback');
-  (function() {
-    // TODO add security for injected url regex
-  var urlSplit = window.location.href.split('?');
-  var nodeHost = window.location.origin;
-  urlSplit = urlSplit[1].split('&');
-  var data = {};
-  // console.log(urlSplit);
-  for (var i=0; i<urlSplit.length; i++) {
-    if (urlSplit[i].indexOf('=')>0) {
-      var split = urlSplit[i].split('=');
-      data[split[0]] = split[1];
-    }
-  }
-  // console.log(data);
-  // console.log('initial hash', hash);
-  if (data.code) {
-    fetch(nodeHost + '/callback', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    }).then(function(response) {
-      if(response.status == 200) {
-        window.close();
-      }
-      // console.log(response);
-    }).catch(function(err) {
-      // Error :(
-      console.log(err);
-      console.log('error');
-    });
-  } else {
-    // TODO: error
-  }
-})();
+    // After user logins into Spotify, Spotify redirects the popup to a set <url>/callback
+    // this popup intercepts it and procces the url for information Spotify sent back
+    (function() {
+      // TODO add security for injected url regex
 
-// TODO: loading screen?
+      // gets web address of called windows location/node server
+      var nodeHost = window.location.origin;
 
+      // splits the url to set infrom into the object data{code: , state:}
+      var urlSplit = window.location.href.split('?');
+      urlSplit = urlSplit[1].split('&');
+      var data = {};
+      for (var i = 0; i < urlSplit.length; i++) {
+        if (urlSplit[i].indexOf('=') > 0) {
+          var split = urlSplit[i].split('=');
+          data[split[0]] = split[1];
+        }
+      }
+
+      // if data has code: then send it to node server /callback
+      if (data.code) {
+        fetch(nodeHost + '/callback', {
+          method: 'POST',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(function(response) {
+          if (response.status == 200) {
+            window.close();
+          }
+        }).catch(function(err) {
+          // Error :(
+          // TODO error data screen relogin
+          console.log(err);
+          console.log('error');
+        });
+      } else {
+        // TODO: error
+      }
+    })();
+
+    // TODO: loading screen?
   </script>
 </head>
 

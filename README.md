@@ -1,6 +1,8 @@
 # Login Node for Spotify
 
-A node.js remote server built to log into the Spotify API. It is setup for minimal calls. It passes the response token to the browser, so that the browser can be used for the API calls.
+A node.js remote server built to log into the Spotify API. It is setup for minimal calls. It passes the response token to the browser, so that the browser can be used for the API calls.  
+
+When the login popup is called, node redirects the popup address for the user to login to Spotify. After the user logs in and approves the access scopes  the popup sends the data to node, node then returns with a code. That code is then sent back to Spotify with the client id and secret to be authenticated. A return object containing tokens are then returned to node and stored in local storage to be used by the client side.
 
 ## Getting Started
 
