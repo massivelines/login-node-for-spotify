@@ -4,6 +4,7 @@ var SpotifyHeroku = function() {
 
   // runs at page load
   function init() {
+
     // sends scopes and main url of page to the node server
     fetch(nodeHost + '/data', {
       method: 'POST',
@@ -16,6 +17,7 @@ var SpotifyHeroku = function() {
       }
     }).catch(function(err) {
       // Error :(
+      window.alert('An error has occurred\nPlease check the console log');
       console.log(err);
       console.log('error');
     });
@@ -24,9 +26,11 @@ var SpotifyHeroku = function() {
     // and if it can be used, refresh current token and hide login
     // else do nothing
     if (localStorage.getItem('refresh_token')) {
-      console.log('refresh_token at startup');
+
       // strips the http and https replace with ws for websocket
       var host = nodeHost.replace(/^https|^http/, 'ws');
+
+      // opens websockets to recive tokens from node server
       var ws = new WebSocket(host + '/refresh');
       ws.onopen = function() {
         ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
@@ -34,7 +38,8 @@ var SpotifyHeroku = function() {
 
       ws.onmessage = function(message) {
         var newToken = JSON.parse(message.data);
-        // if error code 400 is not recived a token has been recived
+
+        // if error code 400 is not recived a new token has been recived
         if (newToken.statusCode !== 400) {
           storage(newToken);
           // hide login
@@ -91,17 +96,21 @@ var SpotifyHeroku = function() {
     function popupClosed() {
       if (popup.closed) {
         // TODO secure websockets
-        // TODO test if callback closed popup
-        // opens websockets
+
         var host = nodeHost.replace(/^https|^http/, 'ws');
         var ws = new WebSocket(host + '/token');
 
         ws.onmessage = function(message) {
-          // TODO test for data
-          var token = JSON.parse(message.data);
-          storage(token);
-          document.getElementById('login').style.display = 'none';
-          ws.close();
+          if (message.data == 400){
+            // user closed popup instead of loging in
+            ws.close();
+          } else {
+            var token = JSON.parse(message.data);
+            storage(token);
+            document.getElementById('login').style.display = 'none';
+            ws.close();
+          }
+
         };
       } else {
         setTimeout(popupClosed, 500);
@@ -113,16 +122,22 @@ var SpotifyHeroku = function() {
 
   // REFRESH - called to refesh the access_token
   this.refresh = function() {
-    var ws = new WebSocket('ws://node-tester-spotify.herokuapp.com/refresh');
+    var host = nodeHost.replace(/^https|^http/, 'ws');
+    var ws = new WebSocket(host + '/refresh');
     ws.onopen = function() {
       ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
     };
 
     ws.onmessage = function(message) {
-      var newToken = JSON.parse(message.data);
-      console.log(newToken);
-      storage(newToken);
-      console.log('refresh');
+      // test if refresh was successful else console.log and show login
+      var body = JSON.parse(message.data);
+      if(body.access_token ){
+        storage(newToken);
+      } else {
+        window.alert("Error getting refresh token check console");
+        console.log(body);
+        document.getElementById('login').style.display = 'inherit';
+      }
       ws.close();
     };
   }; //--------------end of refresh

@@ -12,7 +12,7 @@ The server must be setup correctly. Then add the correct javascript to the clien
 The server can be run locally and also deployed to Heroku. You will need to register your own Spotify app and pass the credentials to the server. For that:
 
 1. Create an application on [Spotify's Developer Site](https://developer.spotify.com/my-applications/).
-2. Add as redirect URIs both `http://localhost:5000/callback` (for development) and `<production_domain>/callback` (if you want to deploy your app somewhere)
+2. Add as redirect URIs both `http://localhost:5000/callback.html` (for development) and `<production_domain>/callback.html` (if you want to deploy your app somewhere)
 3. Keep the client ID and client secret somewhere. You'll need them next.
 
 

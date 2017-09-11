@@ -8,18 +8,18 @@ var expressWs = require('express-ws');
 var app = express();
 expressWs(app);
 
+var DEV = process.env.DEV ? true : false;
 
-
-// TODO: convert to system vars
-var client_id = '8d2ca6ffda244def9852f84650c2bfa2'; // Your client id
-var client_secret = '5e1882b5faba4be4b3db73e9b72ac565';
-// var redirect_uri = 'https://login-node-for-spotify.herokuapp.com/callback.html'; // Your redirect uri
-var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
+var client_id = process.env.CLIENT_ID;
+var client_secret = process.env.CLIENT_SECRET;
+var redirect_uri = DEV ? 'http://localhost:5000/callback.html' : process.env.REDIRECT_URI;
 
 
 var host; //stores what page called node server
 var scopes = []; //stores scopes
 var token; //stores current token
+var callbackClosedPopup = false; // set true if callback returned code 200 to close popup, used confirm for /token call
+var dataRecived = false; // set to true when /data from js file is recived
 
 app.set('port', (process.env.PORT || 5000));
 
@@ -62,9 +62,11 @@ var state;
 
 // data sent when page loads, host scopes
 app.post('/data', function(req, res) {
-  // console.log(req.body);
   host = req.body.hostURL;
   scopes = req.body.scopes;
+  if (scopes) {
+    dataRecived = true;
+  }
   res.end();
 });
 
@@ -74,8 +76,6 @@ app.get('/login', function(req, res) {
   // set token to null incase already had set info example logout and someone else loged in
   token = null;
   state = generateRandomString(16);
-
-  // TODO error out if scopes never filled
 
   // the loop makes sure scopes is populated before calling login redirect on the popup
   function loginRedirect() {
@@ -94,7 +94,14 @@ app.get('/login', function(req, res) {
       }, 500);
     }
   }
-  loginRedirect();
+
+  // check to see if scopes have been populated by post to data
+  if (dataRecived == true) {
+    loginRedirect();
+  } else {
+    res.send('Error loging in. Scopes not populated. Close this window and try again');
+  }
+
 });
 
 // callback from login popup, passes spotify response codes, to turn it into a token
@@ -126,33 +133,39 @@ app.post('/callback', function(req, res) {
         refresh_token: body.refresh_token,
         expires_in: body.expires_in
       };
-      // console.log(token);
-      // send status code to close popup
+
+      // send status code to close popup and set callbackClosedPopup to true
+      callbackClosedPopup = true;
       res.sendStatus(200);
     }).catch(function(err) {
-      // TODO: when error redirect to login
+      res.sendStatus(400);
       console.log(err);
+      console.log('error');
     });
   } else {
-    // TODO create error
+    console.log('states did not match or exist');
   }
 
 });
 
 // when callback closes popup with status code app.js opens a websocket to recive the tokens
 app.ws('/token', function (ws, req) {
-  // TODO error out if never filled
+
   function sendToken() {
-    if( typeof token !== 'undefined' || typeof token !== null){
-      // console.log(token);
+    if(token){
       ws.send(JSON.stringify(token));
     } else {
       setTimeout(sendToken, 500);
     }
-
   }
 
-  sendToken();
+  // test to see if callback sent code 200 to close else send to close connection
+  if (callbackClosedPopup == true) {
+    sendToken();
+  } else {
+    ws.send(400);
+  }
+
 });
 
 // called to refresh the access_token
@@ -160,14 +173,12 @@ app.ws('/refresh', function (ws, req) {
   ws.on('message', function (old_token) {
 
     old_token = JSON.parse(old_token);
-    // console.log(old_token);
 
     var data = req.body;
     var authOptions = {
       method: 'POST',
       url: 'https://accounts.spotify.com/api/token',
       form: {
-        // refresh_token: 'old_token',
         refresh_token: old_token,
         grant_type: 'refresh_token'
       },
@@ -178,20 +189,16 @@ app.ws('/refresh', function (ws, req) {
     };
 
     // get newToken using refresh_token
-    rp(authOptions).
-    then(function(body) {
-
+    rp(authOptions)
+    .then(function(body) {
       var newToken = {
         access_token: body.access_token,
       };
-
       ws.send(JSON.stringify(newToken));
     }).catch(function(err) {
-      // TODO: when error redirect to login
-
       console.log(err);
       var error = {
-        statusCode: err.statusCode,
+        statusCode: '400',
         message: err.message
       };
       ws.send(JSON.stringify(error));
@@ -207,7 +214,3 @@ app.listen(app.get('port'), function() {
 });
 
 // TODO set up security tests for all incoming and outgoing connections/posts
-// for websocket
-// var ip = req.headers.origin;
-// console.log(ip);
-// TODO check if html is needed in callback address on spotify also update readme
