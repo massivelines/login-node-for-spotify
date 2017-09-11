@@ -4,57 +4,59 @@ var SpotifyHeroku = function() {
 
   // runs at launch
   function init() {
-    // // sends scopes and main url of page to node server
-    // fetch(nodeHost + '/data', {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     scopes: scopes,
-    //     hostURL: windowURL
-    //   }),
-    //   headers: {
-    //     'Content-Type': 'application/json'
-    //   }
-    // }).catch(function(err) {
-    //   // Error :(
-    //   console.log(err);
-    //   console.log('error');
-    // });
-    //
-    // // TODO test for login localStorage
-    // // if contains refresh_token try first
-    // // if success hide login
-    // // if error do nothing
-    //
-    // if(localStorage.getItem('refresh_token')){
-    //   console.log('refresh_token at startup');
-    //   var ws = new WebSocket('ws://localhost:5000/refresh');
-    //   ws.onopen = function () {
-    //     ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
-    //   };
-    //
-    //   ws.onmessage = function(message) {
-    //     var newToken = JSON.parse(message.data);
-    //     // checks for error code, if no error refresh token and hide login
-    //     if(newToken.statusCode !== 400){
-    //       console.log(newToken);
-    //       storage(newToken);
-    //       // hide login
-    //       document.getElementById('login').style.display = 'none';
-    //       launch();
-    //     }
-    //     // else {
-    //     //   console.log(newToken);
-    //     // }
-    //     ws.close();
-      // };
-    // }
+    // sends scopes and main url of page to node server
+    fetch(nodeHost + '/data', {
+      method: 'POST',
+      body: JSON.stringify({
+        scopes: scopes,
+        hostURL: windowURL
+      }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).catch(function(err) {
+      // Error :(
+      console.log(err);
+      console.log('error');
+    });
+
+    // TODO test for login localStorage
+    // if contains refresh_token try first
+    // if success hide login
+    // if error do nothing
+
+    if (localStorage.getItem('refresh_token')) {
+      console.log('refresh_token at startup');
+      // TODO strip the http and https replace with ws
+      var host = nodeHost.replace(/^https|^http/, 'ws');
+      var ws = new WebSocket(host + '/refresh');
+      ws.onopen = function() {
+        ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
+      };
+
+      ws.onmessage = function(message) {
+        var newToken = JSON.parse(message.data);
+        // checks for error code, if no error refresh token and hide login
+        if (newToken.statusCode !== 400) {
+          console.log(newToken);
+          storage(newToken);
+          // hide login
+          document.getElementById('login').style.display = 'none';
+          launch();
+        }
+        // else {
+        //   console.log(newToken);
+        // }
+        ws.close();
+      };
+    }
 
   }
 
 
   function storage(token) {
     // TODO determin if all are needed in storage or just access token
-    for (var key in token){
+    for (var key in token) {
       localStorage.setItem(key, token[key]);
     }
   }
@@ -86,8 +88,8 @@ var SpotifyHeroku = function() {
     function popupClosed() {
       if (popup.closed) {
         // TODO secure websockets
-        // var HOST = nodeHost.replace(/^http/, 'ws');
-        var ws = new WebSocket('ws://localhost:5000/token');
+        var host = nodeHost.replace(/^https|^http/, 'ws');
+        var ws = new WebSocket(host + '/token');
 
         ws.onmessage = function(message) {
           var token = JSON.parse(message.data);
@@ -105,9 +107,9 @@ var SpotifyHeroku = function() {
 
   }; //--------------end of login
 
-  this.refresh = function () {
-    var ws = new WebSocket('ws://localhost:5000/refresh');
-    ws.onopen = function () {
+  this.refresh = function() {
+    var ws = new WebSocket('ws://node-tester-spotify.herokuapp.com/refresh');
+    ws.onopen = function() {
       ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
     };
 
@@ -118,12 +120,12 @@ var SpotifyHeroku = function() {
       console.log('refresh');
       ws.close();
     };
-  };//--------------end of refresh
+  }; //--------------end of refresh
 
-  this.logout = function () {
+  this.logout = function() {
     document.getElementById('login').style.display = 'block';
     localStorage.clear();
-  };//--------------end of logout
+  }; //--------------end of logout
 
   init();
 };

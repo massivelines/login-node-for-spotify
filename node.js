@@ -13,7 +13,8 @@ expressWs(app);
 // TODO: convert to system vars
 var client_id = '8d2ca6ffda244def9852f84650c2bfa2'; // Your client id
 var client_secret = '5e1882b5faba4be4b3db73e9b72ac565';
-var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
+var redirect_uri = 'https://node-tester-spotify.herokuapp.com/callback.html'; // Your redirect uri
+// var redirect_uri = 'http://localhost:5000/callback.html'; // Your redirect uri
 
 var allowedConnections = ['http://localhost:5000', 'http://localhost:7879'];
 
