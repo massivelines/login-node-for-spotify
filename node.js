@@ -8,11 +8,9 @@ var expressWs = require('express-ws');
 var app = express();
 expressWs(app);
 
-var DEV = process.env.DEV ? true : false;
-
 var client_id = process.env.CLIENT_ID;
 var client_secret = process.env.CLIENT_SECRET;
-var redirect_uri = DEV ? 'http://localhost:5000/callback.html' : process.env.REDIRECT_URI;
+var redirect_uri = process.env.REDIRECT_URI;
 
 
 var host; //stores what page called node server
