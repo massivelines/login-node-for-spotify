@@ -210,5 +210,3 @@ app.ws('/refresh', function(ws, req) {
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
-
-// TODO set up security tests for all incoming and outgoing connections/posts

@@ -95,7 +95,6 @@ var SpotifyHeroku = function() {
     // then calls storage() to save tokens in localStorage
     function popupClosed() {
       if (popup.closed) {
-        // TODO secure websockets
 
         var host = nodeHost.replace(/^https|^http/, 'ws');
         var ws = new WebSocket(host + '/token');
