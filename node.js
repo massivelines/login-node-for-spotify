@@ -81,8 +81,8 @@ app.get('/login', function(req, res) {
       var url = 'https://accounts.spotify.com/authorize?client_id=' + client_id +
         '&redirect_uri=' + encodeURIComponent(redirect_uri) +
         '&scope=' + encodeURIComponent(scopes.join(' ')) +
-        '&response_type=code'+
-        '&state=' +state+
+        '&response_type=code' +
+        '&state=' + state +
         // can force user to approve scopes every time.
         '&show_dialog=true';
       res.redirect(url);
@@ -147,10 +147,10 @@ app.post('/callback', function(req, res) {
 });
 
 // when callback closes popup with status code app.js opens a websocket to recive the tokens
-app.ws('/token', function (ws, req) {
+app.ws('/token', function(ws, req) {
 
   function sendToken() {
-    if(token){
+    if (token) {
       ws.send(JSON.stringify(token));
     } else {
       setTimeout(sendToken, 500);
@@ -167,8 +167,8 @@ app.ws('/token', function (ws, req) {
 });
 
 // called to refresh the access_token
-app.ws('/refresh', function (ws, req) {
-  ws.on('message', function (old_token) {
+app.ws('/refresh', function(ws, req) {
+  ws.on('message', function(old_token) {
 
     old_token = JSON.parse(old_token);
 
@@ -188,19 +188,19 @@ app.ws('/refresh', function (ws, req) {
 
     // get newToken using refresh_token
     rp(authOptions)
-    .then(function(body) {
-      var newToken = {
-        access_token: body.access_token,
-      };
-      ws.send(JSON.stringify(newToken));
-    }).catch(function(err) {
-      console.log(err);
-      var error = {
-        statusCode: '400',
-        message: err.message
-      };
-      ws.send(JSON.stringify(error));
-    });
+      .then(function(body) {
+        var newToken = {
+          access_token: body.access_token,
+        };
+        ws.send(JSON.stringify(newToken));
+      }).catch(function(err) {
+        console.log(err);
+        var error = {
+          statusCode: '400',
+          message: err.message
+        };
+        ws.send(JSON.stringify(error));
+      });
 
   });
 });

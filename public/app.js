@@ -101,7 +101,7 @@ var SpotifyHeroku = function() {
         var ws = new WebSocket(host + '/token');
 
         ws.onmessage = function(message) {
-          if (message.data == 400){
+          if (message.data == 400) {
             // user closed popup instead of loging in
             ws.close();
           } else {
@@ -131,8 +131,8 @@ var SpotifyHeroku = function() {
     ws.onmessage = function(message) {
       // test if refresh was successful else console.log and show login
       var body = JSON.parse(message.data);
-      if(body.access_token ){
-        storage(newToken);
+      if (body.access_token) {
+        storage(body.access_token);
       } else {
         window.alert("Error getting refresh token check console");
         console.log(body);
