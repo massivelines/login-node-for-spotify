@@ -55,8 +55,7 @@ CLIENT_SECRET <your_client_secret>
 REDIRECT_URI <your_redirect_uri>
 ```
 
-or  
-TODO: deploy launch button
+
 
 
 Import the script into your html file:
@@ -107,3 +106,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Inspiration from
 [spotify-player](https://github.com/JMPerez/spotify-player)
+
+TODO: how to access localStorage
+TODO: heroku deploy launch button
+TODO: how login is hidden
+TODO: if new scopes force new login
