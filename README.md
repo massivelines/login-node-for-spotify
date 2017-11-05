@@ -23,7 +23,7 @@ Link the js file at the end of the body.
 <script src="http://localhost:5000/app.js"></script>
 ```
 
-Install [Node.js](http://nodejs.org/) if you dont have it already.
+Install [Node.js](http://nodejs.org/) if you don't have it already.
 
 ```sh
 cd into directory
@@ -93,13 +93,23 @@ document.getElementById('login').addEventListener("click", function() {
   spotify.login();
 });
 ```
-Launch fuction is called when the user has succesfly logged in
+Launch fuction is called when the user has successfully logged in
 ```js
 // called from app.js after logged in
 function launch() {
 
 }
 ```
+
+After the login is successful, the node server will pass the tokens into the clients local storage using web sockets. To access them just call
+
+```js
+var example1 = localStorage.getItem('access_token');
+var example2 = localStorage.getItem('expires_in');
+var example3 = localStorage.getItem('refresh_token');
+```
+After receiving the tokens you are ready to access the Spotify api endpoints.
+
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
@@ -107,7 +117,5 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Inspiration from
 [spotify-player](https://github.com/JMPerez/spotify-player)
 
-TODO: how to access localStorage
-TODO: heroku deploy launch button
-TODO: how login is hidden
-TODO: if new scopes force new login
+TODO: heroku deploy launch button  
+TODO: if new scopes force new login  

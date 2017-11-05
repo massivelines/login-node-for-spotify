@@ -2,9 +2,9 @@
   "name": "spotify-login-test-server",
   "version": "1.0.0",
   "description": "A node.js remote server built to log into the Spotify API. It is setup for minimal calls. It passes the response token to the browser, so that the browser can be used for the API calls.",
-  "main": "node.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node node.js"
+    "start": "node app.js"
   },
   "author": "Shawn Rhodes",
   "license": "MIT",

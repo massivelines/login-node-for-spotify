@@ -42,9 +42,13 @@ var SpotifyHeroku = function() {
         // if error code 400 is not recived a new token has been recived
         if (newToken.statusCode !== 400) {
           storage(newToken);
-          // hide login
-          document.getElementById('login').style.display = 'none';
-          launch();
+
+          // TODO: check for other logins
+          fadeLogin();
+
+          // document.getElementById('login').style.display = 'none';
+
+
         }
         ws.close();
       };
@@ -106,7 +110,8 @@ var SpotifyHeroku = function() {
           } else {
             var token = JSON.parse(message.data);
             storage(token);
-            document.getElementById('login').style.display = 'none';
+            fadeLogin();
+            // document.getElementById('login').style.display = 'none';
             ws.close();
           }
 
@@ -147,6 +152,34 @@ var SpotifyHeroku = function() {
     document.getElementById('login').style.display = 'inherit';
     localStorage.clear();
   }; //--------------end of logout
+
+
+  // fade login then set to display none
+  function fadeLogin() {
+    // interval is set to 10ms, reduce loginFade to how many times it will run;
+    var loginFadeTime = loginFade / 10;
+    // how much to subtract each time
+    var loginOpacitySteps = 1 / loginFadeTime;
+    var loginCurrentOpaicty = 1;
+    var loginDiv = document.getElementById('login');
+
+    var intervalLoginFade = setInterval(fadeInterval, 10);
+
+    function fadeInterval() {
+      if (loginCurrentOpaicty <= 0) {
+        clearInterval(intervalLoginFade);
+        loginDiv.setAttribute('style', 'display: none;');
+
+        // calls launch fuction on client side
+        launch();
+      } else {
+        loginCurrentOpaicty = loginCurrentOpaicty - loginOpacitySteps;
+        loginDiv.setAttribute('style', 'opacity: ' + loginCurrentOpaicty + ';');
+      }
+    }
+
+
+  }
 
 
   // runs init function at page load
