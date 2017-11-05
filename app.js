@@ -146,7 +146,7 @@ app.post('/callback', function(req, res) {
 
 });
 
-// when callback closes popup with status code app.js opens a websocket to recive the tokens
+// when callback closes popup with status code spotifyLogin.js opens a websocket to recive the tokens
 app.ws('/token', function(ws, req) {
 
   function sendToken() {

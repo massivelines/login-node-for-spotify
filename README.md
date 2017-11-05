@@ -18,11 +18,6 @@ The server can be run locally and also deployed to Heroku. You will need to regi
 
 
 #### Running Locally
-Link the js file at the end of the body.
-```html
-<script src="http://localhost:5000/app.js"></script>
-```
-
 Install [Node.js](http://nodejs.org/) if you don't have it already.
 
 ```sh
@@ -35,6 +30,10 @@ set REDIRECT_URI=<your_redirect_uri>
 npm start
 ```
 
+Link the js file at the end of the body on the html file:
+```html
+<script src="http://localhost:5000/spotifyLogin.js"></script>
+```
 
 Your app should now be running on [localhost:5000](http://localhost:5000/).
 
@@ -57,18 +56,20 @@ REDIRECT_URI <your_redirect_uri>
 
 
 
-
-Import the script into your html file:
+Link the js file at the end of the body on the html file:
 ```html
-<script src="https://<your-app-name>.herokuapp.com/app.js"></script>
+<script src="https://<your-app-name>.herokuapp.com/spotifyLogin.js"></script>
 ```
 
 ## Client Side
 Define your server and scopes
 ```js
-var scopes = ['user-read-playback-state']; //scopes for permissions
+var scopes = ['...']; //scopes for permissions
+// example 'user-read-playback-state'
+
 var nodeHost = '...'; //location of node server
-//example: http://localhost:5000 or https://<your-app-name>.herokuapp.com
+// example: 'http://localhost:5000' or 'https://<your-app-name>.herokuapp.com'
+
 
 var spotify = new SpotifyHeroku(scopes, nodeHost); //passes vars to class
 
@@ -87,16 +88,16 @@ spotify.logout();
 spotify.refresh();
 
 ```
-Usage Example
+Call Example
 ```js
 document.getElementById('login').addEventListener("click", function() {
   spotify.login();
 });
 ```
-Launch fuction is called when the user has successfully logged in
+main function is called when the user has successfully logged in
 ```js
-// called from app.js after logged in
-function launch() {
+// called from spotifyLogin.js after logged in
+function main() {
 
 }
 ```
@@ -108,7 +109,9 @@ var example1 = localStorage.getItem('access_token');
 var example2 = localStorage.getItem('expires_in');
 var example3 = localStorage.getItem('refresh_token');
 ```
+
 After receiving the tokens you are ready to access the Spotify api endpoints.
+Check the clientSideExample folder for a setup example.  
 
 ## License
 

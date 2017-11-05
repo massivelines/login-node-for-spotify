@@ -28,3 +28,8 @@ spotify.refresh();
 var example1 = localStorage.getItem('access_token');
 var example2 = localStorage.getItem('expires_in');
 var example3 = localStorage.getItem('refresh_token');
+
+// called from spotifyLogin.js after logged in
+function main() {
+
+}

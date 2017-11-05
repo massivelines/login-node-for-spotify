@@ -1,6 +1,7 @@
 var SpotifyHeroku = function() {
 
   var windowURL = window.location.origin;
+  var autoRefreshTimeout;
 
   // runs at page load
   function init() {
@@ -43,11 +44,8 @@ var SpotifyHeroku = function() {
         if (newToken.statusCode !== 400) {
           storage(newToken);
 
-          // TODO: check for other logins
-          fadeLogin();
-
-          // document.getElementById('login').style.display = 'none';
-
+          // calls fadeLogin with a 1 to hide, to show call with a 0
+          fadeLogin(1);
 
         }
         ws.close();
@@ -55,15 +53,6 @@ var SpotifyHeroku = function() {
     }
 
   }
-
-
-  // called to store tokens into localStorage
-  function storage(token) {
-    for (var key in token) {
-      localStorage.setItem(key, token[key]);
-    }
-  }
-
 
   // LOGIN - opens popup at nodeHost/login then node redirects and popup sends node information
   this.login = function() {
@@ -110,8 +99,8 @@ var SpotifyHeroku = function() {
           } else {
             var token = JSON.parse(message.data);
             storage(token);
-            fadeLogin();
-            // document.getElementById('login').style.display = 'none';
+            // calls fadeLogin with a 1 to hide, to show call with a 0
+            fadeLogin(1);
             ws.close();
           }
 
@@ -126,6 +115,11 @@ var SpotifyHeroku = function() {
 
   // REFRESH - called to refesh the access_token
   this.refresh = function() {
+    refreshToken();
+  };
+
+  // sepperate function so can be called in other fuctions
+  function refreshToken() {
     var host = nodeHost.replace(/^https|^http/, 'ws');
     var ws = new WebSocket(host + '/refresh');
     ws.onopen = function() {
@@ -140,47 +134,99 @@ var SpotifyHeroku = function() {
       } else {
         window.alert("Error getting refresh token check console");
         console.log(body);
-        document.getElementById('login').style.display = 'inherit';
+        fadeLogin(0);
       }
       ws.close();
     };
-  }; //--------------end of refresh
+  }
+  //--------------end of refresh
 
 
   // LOGOUT - called to clear tokens and show login
   this.logout = function() {
-    document.getElementById('login').style.display = 'inherit';
+    fadeLogin(0);
+    clearTimeout(autoRefreshTimeout);
     localStorage.clear();
   }; //--------------end of logout
 
 
-  // fade login then set to display none
-  function fadeLogin() {
+
+
+  // called to store tokens into localStorage
+  function storage(token) {
+    // calls autoRefresh everytime token is saved
+    autoRefresh();
+    for (var key in token) {
+      localStorage.setItem(key, token[key]);
+    }
+  }
+
+  function autoRefresh() {
+    // token is good for 1 hour(3600), refresh 5 mins before
+    var timer = 3300 * 1000;
+    autoRefreshTimeout = setTimeout(function () {
+      // creates a refresh token loop
+      refreshToken();
+    }, timer);
+  }
+
+
+  // fades login element value=1 will hide, value=0 will show
+  function fadeLogin(value) {
     // interval is set to 10ms, reduce loginFade to how many times it will run;
     var loginFadeTime = loginFade / 10;
-    // how much to subtract each time
-    var loginOpacitySteps = 1 / loginFadeTime;
-    var loginCurrentOpaicty = 1;
+
+    // login element starts at opacity=1
+    var currentOpaicty = value;
+
+    // determins amount to subtract each time it loops
+    var opacityStep = 1 / loginFadeTime;
+
+    // get login element
     var loginDiv = document.getElementById('login');
 
-    var intervalLoginFade = setInterval(fadeInterval, 10);
 
-    function fadeInterval() {
-      if (loginCurrentOpaicty <= 0) {
-        clearInterval(intervalLoginFade);
-        loginDiv.setAttribute('style', 'display: none;');
 
-        // calls launch fuction on client side
-        launch();
-      } else {
-        loginCurrentOpaicty = loginCurrentOpaicty - loginOpacitySteps;
-        loginDiv.setAttribute('style', 'opacity: ' + loginCurrentOpaicty + ';');
+    if (currentOpaicty == 1) {
+      // sets visiable to pass it to fadeInterval and keep a constant var
+      var visiable = currentOpaicty;
+      // runs interval
+      var fade = setInterval(function() {
+        fadeInterval(visiable)
+      }, 10);
+    } else if (currentOpaicty == 0) {
+      var visiable = currentOpaicty;
+      var fade = setInterval(function() {
+        fadeInterval(visiable)
+      }, 10);
+    }
+
+    function fadeInterval(visiable) {
+      if (visiable == 1) {
+        // when opacity <= 0 set display=none
+        if (currentOpaicty <= 0) {
+          clearInterval(fade);
+          loginDiv.setAttribute('style', 'display: none;');
+
+          // then call main fuction on client side
+          main();
+          // else lower oppacity by opacityStep
+        } else {
+          currentOpaicty = currentOpaicty - opacityStep;
+          loginDiv.setAttribute('style', 'opacity: ' + currentOpaicty + ';');
+        }
+      } else if (visiable == 0) {
+        if (currentOpaicty >= 1) {
+          clearInterval(fade);
+          loginDiv.setAttribute('style', 'display: inherit;');
+        } else {
+          currentOpaicty = currentOpaicty + opacityStep;
+          loginDiv.setAttribute('style', 'opacity: ' + currentOpaicty + ';');
+        }
       }
     }
 
-
-  }
-
+  } //--------------end of fadeLogin
 
   // runs init function at page load
   init();
