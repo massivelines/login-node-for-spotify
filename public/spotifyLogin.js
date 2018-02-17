@@ -29,7 +29,7 @@ var SpotifyHeroku = function() {
     if (localStorage.getItem('refresh_token')) {
 
       // strips the http and https replace with ws for websocket
-      var host = nodeHost.replace(/^https|^http/, 'ws');
+      var host = nodeHost.replace(/^https|^http/, 'wss');
 
       // opens websockets to recive tokens from node server
       var ws = new WebSocket(host + '/refresh');
@@ -89,7 +89,7 @@ var SpotifyHeroku = function() {
     function popupClosed() {
       if (popup.closed) {
 
-        var host = nodeHost.replace(/^https|^http/, 'ws');
+        var host = nodeHost.replace(/^https|^http/, 'wss');
         var ws = new WebSocket(host + '/token');
 
         ws.onmessage = function(message) {
@@ -120,7 +120,7 @@ var SpotifyHeroku = function() {
 
   // sepperate function so can be called in other fuctions
   function refreshToken() {
-    var host = nodeHost.replace(/^https|^http/, 'ws');
+    var host = nodeHost.replace(/^https|^http/, 'wss');
     var ws = new WebSocket(host + '/refresh');
     ws.onopen = function() {
       ws.send(JSON.stringify(localStorage.getItem('refresh_token')));
